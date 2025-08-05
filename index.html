@@ -1,0 +1,1167 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Color Sprint Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f1c40f;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+        }
+        
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+            background: #f5f5f5;
+            touch-action: manipulation;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 15px;
+        }
+        
+        #login-screen, #game-screen, #stats-screen, #end-screen, #level-locked-screen {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        #game-screen, #stats-screen, #end-screen, #level-locked-screen {
+            display: none;
+        }
+        
+        h1, h2, h3 {
+            color: var(--dark);
+            margin-bottom: 15px;
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+        }
+        
+        h2 {
+            font-size: 1.3rem;
+        }
+        
+        h3 {
+            font-size: 1.1rem;
+        }
+        
+        input, button, select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            font-size: 1rem;
+            -webkit-appearance: none;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        #target {
+            font-size: 1.5rem;
+            margin: 15px 0;
+            padding: 12px 20px;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: inline-block;
+            font-weight: bold;
+        }
+        
+        #options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .option {
+            aspect-ratio: 1/1;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0;
+        }
+        
+        .option:active {
+            transform: scale(0.95);
+        }
+        
+        #game-info {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            gap: 10px;
+        }
+        
+        .info-box {
+            background: var(--light);
+            padding: 8px 12px;
+            border-radius: 8px;
+            flex: 1;
+            font-size: 0.9rem;
+        }
+        
+        .feedback {
+            position: fixed;
+            font-size: 2.5rem;
+            font-weight: bold;
+            opacity: 0;
+            transition: all 0.5s;
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        #level-selector {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+            margin: 15px 0;
+        }
+        
+        .level-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1rem;
+            padding: 0;
+        }
+        
+        .level-btn.active {
+            background-color: var(--warning);
+            color: var(--dark);
+        }
+        
+        .level-btn.locked {
+            background-color: #95a5a6;
+            position: relative;
+        }
+        
+        .level-btn.locked::after {
+            content: "🔒";
+            position: absolute;
+            font-size: 0.7rem;
+            top: -5px;
+            right: -5px;
+        }
+        
+        .level-btn.hard {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        #leaderboard-preview {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .leaderboard-item.highlight {
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .time-filter {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        
+        .time-filter button {
+            flex: 1;
+            padding: 8px;
+            font-size: 0.8rem;
+        }
+        
+        .time-filter button.active {
+            background-color: var(--warning);
+            color: var(--dark);
+        }
+        
+        #back-btn, #play-again-btn {
+            background-color: var(--danger);
+            margin-top: 15px;
+        }
+        
+        #continue-btn {
+            background-color: var(--secondary);
+            margin-top: 15px;
+        }
+        
+        #unlock-btn {
+            background-color: var(--warning);
+            color: var(--dark);
+            margin-top: 15px;
+        }
+        
+        .selecting {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            border: 2px dashed var(--warning);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10;
+            transition: all 0.3s ease-out;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 400px) {
+            .container {
+                padding: 10px;
+            }
+            
+            #options {
+                gap: 8px;
+            }
+            
+            .info-box {
+                padding: 6px 8px;
+                font-size: 0.8rem;
+            }
+            
+            #target {
+                font-size: 1.2rem;
+                padding: 10px 15px;
+            }
+            
+            .time-filter button {
+                font-size: 0.7rem;
+                padding: 5px;
+            }
+        }
+    </style>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Screen -->
+        <div id="login-screen">
+            <h1>Color Sprint Pro</h1>
+            <p>Test your color recognition skills!</p>
+            <input type="text" id="username" placeholder="Enter your username" autocapitalize="none">
+            <button id="start-btn">Start Game</button>
+            <div id="login-error" style="color: var(--danger); margin-top: 10px; display: none;"></div>
+        </div>
+        
+        <!-- Game Screen -->
+        <div id="game-screen">
+            <h1>Level <span id="current-level">1</span></h1>
+            
+            <div id="game-info">
+                <div class="info-box">Time: <span id="timer">30</span>s</div>
+                <div class="info-box">Score: <span id="score">0</span></div>
+                <div class="info-box">Hi-score: <span id="hi-score">0</span></div>
+            </div>
+            
+            <div id="target">Color Name</div>
+            
+            <div id="options"></div>
+            
+            <div id="leaderboard-preview">
+                <h3>Top Players</h3>
+                <div id="all-time-leaderboard">
+                    <div class="leaderboard-item"><span>All Time:</span> <span>Loading...</span></div>
+                </div>
+                <div id="week-leaderboard">
+                    <div class="leaderboard-item"><span>This Week:</span> <span>Loading...</span></div>
+                </div>
+                <div id="today-leaderboard">
+                    <div class="leaderboard-item"><span>Today:</span> <span>Loading...</span></div>
+                </div>
+            </div>
+            
+            <div id="level-selector">
+                <!-- Levels will be added dynamically -->
+            </div>
+            
+            <button id="stats-btn">View Stats</button>
+        </div>
+        
+        <!-- Stats Screen -->
+        <div id="stats-screen">
+            <h1>Game Statistics</h1>
+            <h2 id="stats-username"></h2>
+            
+            <h3>Overall Performance</h3>
+            <div id="overall-stats"></div>
+            
+            <h3>Level Leaderboards</h3>
+            <select id="leaderboard-select">
+                <!-- Options will be added dynamically -->
+            </select>
+            
+            <div class="time-filter">
+                <button class="time-btn active" data-time="all">All Time</button>
+                <button class="time-btn" data-time="week">This Week</button>
+                <button class="time-btn" data-time="today">Today</button>
+            </div>
+            
+            <div id="leaderboard-container"></div>
+            
+            <button id="back-btn">Back to Game</button>
+        </div>
+        
+        <!-- End Game Screen -->
+        <div id="end-screen">
+            <h1>Game Over!</h1>
+            <h2>Level <span id="end-level">1</span></h2>
+            
+            <div class="info-box" style="margin: 15px auto; max-width: 200px;">
+                Your Score: <span id="end-score">0</span>
+            </div>
+            
+            <div class="info-box" style="margin: 15px auto; max-width: 200px;">
+                Hi-score: <span id="end-hiscore">0</span>
+            </div>
+            
+            <button id="play-again-btn">Play Again</button>
+            <button id="continue-btn">Next Level</button>
+            <button id="end-stats-btn">View Stats</button>
+        </div>
+        
+        <!-- Level Locked Screen -->
+        <div id="level-locked-screen">
+            <h1>Level Locked!</h1>
+            <p>You need to complete level <span id="required-level">1</span> first!</p>
+            <button id="unlock-btn">Go to Level <span id="unlock-level">1</span></button>
+            <button id="locked-back-btn">Back to Game</button>
+        </div>
+    </div>
+    
+    <div class="feedback" id="feedback"></div>
+    <div class="selecting" id="selecting-indicator" style="display: none;"></div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6KORcPrlTQdwHbjAiVmxdgIGJ2A3FCp4",
+            authDomain: "colordetector-a7a71.firebaseapp.com",
+            projectId: "colordetector-a7a71",
+            storageBucket: "colordetector-a7a71.appspot.com",
+            messagingSenderId: "643341320351",
+            appId: "1:643341320351:web:71c2aec0877441a837a2aa",
+            measurementId: "G-GZBRDB7KFY"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+        
+        // Game variables
+        let currentUser = null;
+        let score = 0;
+        let hiScore = 0;
+        let timeLeft = 30;
+        let timer;
+        let currentLevel = 1;
+        let maxUnlockedLevel = 1;
+        let colors = [];
+        let correctIndex;
+        let timeFilter = 'all';
+        let gameActive = false;
+        let gameStartTime = 0;
+        
+        // Security variables (to prevent cheating)
+        const gameHash = Math.random().toString(36).substring(2, 15);
+        let lastUpdateTime = 0;
+        
+        // Color database
+        const colorNames = [
+            'Red', 'Blue', 'Green', 'Yellow', 
+            'Purple', 'Navy', 'White', 'Black',
+            'Gray', 'Brown', 'Pink', 'Orange',
+            'Teal', 'Sky', 'Lime', 'Coral',
+            'Gold', 'Silver', 'Maroon', 'Olive',
+            'Violet', 'Indigo', 'Cyan', 'Magenta',
+            'Beige', 'Mint', 'Lavender', 'Ruby',
+            'Emerald', 'Sapphire'
+        ];
+        
+        const colorValues = [
+            '#e74c3c', '#3498db', '#2ecc71', '#f1c40f',
+            '#9b59b6', '#2980b9', '#ecf0f1', '#2c3e50',
+            '#95a5a6', '#a67c52', '#ff9ff3', '#feca57',
+            '#1dd1a1', '#54a0ff', '#badc58', '#ff6b6b',
+            '#ffd700', '#c0c0c0', '#800000', '#808000',
+            '#ee82ee', '#4b0082', '#00ffff', '#ff00ff',
+            '#f5f5dc', '#98ff98', '#e6e6fa', '#e0115f',
+            '#50c878', '#0f52ba'
+        ];
+        
+        // DOM elements
+        const loginScreen = document.getElementById('login-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const statsScreen = document.getElementById('stats-screen');
+        const endScreen = document.getElementById('end-screen');
+        const lockedScreen = document.getElementById('level-locked-screen');
+        const usernameInput = document.getElementById('username');
+        const startBtn = document.getElementById('start-btn');
+        const loginError = document.getElementById('login-error');
+        const statsBtn = document.getElementById('stats-btn');
+        const backBtn = document.getElementById('back-btn');
+        const playAgainBtn = document.getElementById('play-again-btn');
+        const continueBtn = document.getElementById('continue-btn');
+        const endStatsBtn = document.getElementById('end-stats-btn');
+        const unlockBtn = document.getElementById('unlock-btn');
+        const lockedBackBtn = document.getElementById('locked-back-btn');
+        const levelSelector = document.getElementById('level-selector');
+        const timeBtns = document.querySelectorAll('.time-btn');
+        const selectingIndicator = document.getElementById('selecting-indicator');
+        
+        // Initialize game
+        startBtn.addEventListener('click', async () => {
+            const username = usernameInput.value.trim();
+            if (username) {
+                try {
+                    loginError.style.display = 'none';
+                    startBtn.disabled = true;
+                    startBtn.textContent = 'Loading...';
+                    
+                    // Sign in anonymously
+                    const userCredential = await auth.signInAnonymously();
+                    currentUser = userCredential.user;
+                    
+                    // Check if username exists
+                    const usernameSnapshot = await database.ref('usernames/' + username.toLowerCase()).once('value');
+                    
+                    if (usernameSnapshot.exists() && usernameSnapshot.val() !== currentUser.uid) {
+                        // Username already taken by another user
+                        throw new Error('Username already taken');
+                    }
+                    
+                    // Set username in database
+                    await database.ref('users/' + currentUser.uid).set({
+                        username: username,
+                        lastLogin: new Date().toISOString(),
+                        gameHash: gameHash
+                    });
+                    
+                    // Reserve username
+                    await database.ref('usernames/' + username.toLowerCase()).set(currentUser.uid);
+                    
+                    // Load user data
+                    await loadUserData();
+                    
+                    // Show game screen
+                    loginScreen.style.display = 'none';
+                    gameScreen.style.display = 'block';
+                    updateHiScore();
+                    startGame();
+                } catch (error) {
+                    console.error('Error starting game:', error);
+                    loginError.textContent = error.message === 'Username already taken' ? 
+                        'Username already taken. Please choose another.' : 
+                        'Error starting game. Please try again.';
+                    loginError.style.display = 'block';
+                    startBtn.disabled = false;
+                    startBtn.textContent = 'Start Game';
+                    
+                    // Sign out if authentication succeeded but other steps failed
+                    if (currentUser) {
+                        await auth.signOut();
+                        currentUser = null;
+                    }
+                }
+            }
+        });
+        
+        // Other event listeners
+        statsBtn.addEventListener('click', showStats);
+        backBtn.addEventListener('click', () => {
+            statsScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
+        });
+        
+        playAgainBtn.addEventListener('click', () => {
+            endScreen.style.display = 'none';
+            resetGame();
+        });
+        
+        continueBtn.addEventListener('click', () => {
+            endScreen.style.display = 'none';
+            if (currentLevel < 10) {
+                currentLevel++;
+                updateActiveLevelButton();
+                resetGame();
+            } else {
+                currentLevel = 1;
+                updateActiveLevelButton();
+                resetGame();
+            }
+        });
+        
+        endStatsBtn.addEventListener('click', () => {
+            endScreen.style.display = 'none';
+            showStats();
+        });
+        
+        unlockBtn.addEventListener('click', () => {
+            lockedScreen.style.display = 'none';
+            currentLevel = parseInt(document.getElementById('unlock-level').textContent);
+            updateActiveLevelButton();
+            resetGame();
+        });
+        
+        lockedBackBtn.addEventListener('click', () => {
+            lockedScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
+        });
+        
+        // Time filter buttons
+        timeBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                timeFilter = this.dataset.time;
+                document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                updateLeaderboard();
+            });
+        });
+        
+        // Initialize level buttons
+        function initializeLevelButtons() {
+            levelSelector.innerHTML = '';
+            for (let i = 1; i <= 10; i++) {
+                const btn = document.createElement('button');
+                btn.className = `level-btn ${i === 1 ? 'active' : ''} ${i > maxUnlockedLevel ? 'locked' : ''} ${i > 5 ? 'hard' : ''}`;
+                btn.dataset.level = i;
+                btn.textContent = i;
+                
+                btn.addEventListener('click', function() {
+                    const level = parseInt(this.dataset.level);
+                    if (level > maxUnlockedLevel) {
+                        document.getElementById('required-level').textContent = level - 1;
+                        document.getElementById('unlock-level').textContent = level - 1;
+                        gameScreen.style.display = 'none';
+                        lockedScreen.style.display = 'block';
+                        return;
+                    }
+                    
+                    if (level !== currentLevel) {
+                        currentLevel = level;
+                        updateActiveLevelButton();
+                        resetGame();
+                    }
+                });
+                
+                levelSelector.appendChild(btn);
+            }
+        }
+        
+        // Initialize leaderboard select
+        function initializeLeaderboardSelect() {
+            const select = document.getElementById('leaderboard-select');
+            select.innerHTML = '';
+            for (let i = 1; i <= 10; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `Level ${i}`;
+                select.appendChild(option);
+            }
+        }
+        
+        // Load user data from Firebase
+        async function loadUserData() {
+            const snapshot = await database.ref('userScores/' + currentUser.uid).once('value');
+            if (!snapshot.exists()) {
+                // Initialize with empty data
+                await database.ref('userScores/' + currentUser.uid).set({
+                    scores: Array(10).fill(0),
+                    playCount: Array(10).fill(0),
+                    lastPlayed: new Date().toISOString(),
+                    history: {},
+                    maxUnlocked: 1,
+                    gameHash: gameHash
+                });
+                maxUnlockedLevel = 1;
+            } else {
+                const data = snapshot.val();
+                maxUnlockedLevel = data.maxUnlocked || 1;
+                
+                // Security check
+                if (data.gameHash !== gameHash) {
+                    // Potential cheating detected
+                    await database.ref('userScores/' + currentUser.uid).update({
+                        gameHash: gameHash,
+                        scores: Array(10).fill(0),
+                        maxUnlocked: 1
+                    });
+                    maxUnlockedLevel = 1;
+                }
+            }
+            
+            initializeLevelButtons();
+            initializeLeaderboardSelect();
+            updateTopLeaderboards();
+        }
+        
+        // Game functions
+        function startGame() {
+            resetGame();
+            updateActiveLevelButton();
+        }
+        
+        function resetGame() {
+            clearInterval(timer);
+            score = 0;
+            timeLeft = getLevelTime();
+            updateDisplay();
+            setupRound();
+            gameScreen.style.display = 'block';
+            endScreen.style.display = 'none';
+            gameActive = true;
+            gameStartTime = Date.now();
+            lastUpdateTime = Date.now();
+            
+            // Use precise timer that only counts whole seconds
+            let lastSecond = Math.floor(Date.now() / 1000);
+            timer = setInterval(() => {
+                const now = Math.floor(Date.now() / 1000);
+                if (now !== lastSecond) {
+                    lastSecond = now;
+                    updateTimer();
+                }
+            }, 100);
+        }
+        
+        function getLevelTime() {
+            // Decrease time as level increases
+            return Math.max(10, 35 - currentLevel * 2.5);
+        }
+        
+        function updateTimer() {
+            if (!gameActive) return;
+            
+            timeLeft--;
+            document.getElementById('timer').textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }
+        
+        function setupRound() {
+            // Adjust difficulty based on level
+            const numOptions = Math.min(4 + Math.floor(currentLevel / 2), 8);
+            const colorPoolSize = Math.min(10 + currentLevel * 3, colorNames.length);
+            
+            colors = [];
+            const usedIndices = [];
+            
+            for (let i = 0; i < numOptions; i++) {
+                let randomIndex;
+                do {
+                    randomIndex = Math.floor(Math.random() * colorPoolSize);
+                } while (usedIndices.includes(randomIndex));
+                
+                usedIndices.push(randomIndex);
+                colors.push({
+                    name: colorNames[randomIndex],
+                    value: colorValues[randomIndex]
+                });
+            }
+            
+            // Correct answer
+            correctIndex = Math.floor(Math.random() * numOptions);
+            document.getElementById('target').textContent = colors[correctIndex].name;
+            document.getElementById('target').style.color = getTextColor();
+            
+            // Create options
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            optionsContainer.style.gridTemplateColumns = `repeat(${Math.min(3, Math.ceil(numOptions/2))}, 1fr)`;
+            
+            colors.forEach((color, index) => {
+                const option = document.createElement('div');
+                option.className = 'option';
+                option.style.backgroundColor = color.value;
+                option.dataset.index = index;
+                
+                option.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    showSelectingIndicator(this);
+                });
+                
+                option.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    hideSelectingIndicator();
+                    checkAnswer(parseInt(this.dataset.index));
+                });
+                
+                option.addEventListener('mousedown', function() {
+                    showSelectingIndicator(this);
+                });
+                
+                option.addEventListener('mouseup', function() {
+                    hideSelectingIndicator();
+                    checkAnswer(parseInt(this.dataset.index));
+                });
+                
+                option.addEventListener('mouseleave', hideSelectingIndicator);
+                
+                optionsContainer.appendChild(option);
+            });
+        }
+        
+        function showSelectingIndicator(element) {
+            const rect = element.getBoundingClientRect();
+            selectingIndicator.style.display = 'block';
+            selectingIndicator.style.left = `${rect.left + rect.width/2 - 22}px`;
+            selectingIndicator.style.top = `${rect.top + rect.height/2 - 22}px`;
+        }
+        
+        function hideSelectingIndicator() {
+            selectingIndicator.style.display = 'none';
+        }
+        
+        function getTextColor() {
+            // For higher levels, sometimes make text color different from text meaning
+            if (currentLevel > 3 && Math.random() > 0.5) {
+                const wrongColor = colors.filter((_, i) => i !== correctIndex);
+                return wrongColor[Math.floor(Math.random() * wrongColor.length)].value;
+            }
+            return colors[correctIndex].value;
+        }
+        
+        async function checkAnswer(selectedIndex) {
+            if (!gameActive) return;
+            
+            const now = Date.now();
+            if (now - lastUpdateTime < 200) {
+                // Prevent rapid clicking
+                return;
+            }
+            lastUpdateTime = now;
+            
+            const feedback = document.getElementById('feedback');
+            
+            if (selectedIndex === correctIndex) {
+                const pointsEarned = currentLevel * 5;
+                score += pointsEarned;
+                feedback.textContent = `+${pointsEarned}`;
+                feedback.style.color = '#2ecc71';
+                
+                if (score % (currentLevel * 50) === 0) {
+                    timeLeft += 3;
+                    feedback.textContent = `+${pointsEarned} (+3s)`;
+                }
+            } else {
+                score = Math.max(0, score - 2);
+                feedback.textContent = '-2';
+                feedback.style.color = '#e74c3c';
+                timeLeft = Math.max(3, timeLeft - 1);
+            }
+            
+            feedback.style.opacity = '1';
+            feedback.style.top = (Math.random() * window.innerHeight * 0.6 + 20) + 'px';
+            feedback.style.left = (Math.random() * window.innerWidth * 0.8 + 20) + 'px';
+            
+            setTimeout(() => {
+                feedback.style.opacity = '0';
+            }, 500);
+            
+            updateDisplay();
+            setupRound();
+        }
+        
+        async function updateDisplay() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('current-level').textContent = currentLevel;
+            document.getElementById('timer').textContent = timeLeft;
+            
+            if (score > hiScore) {
+                hiScore = score;
+                document.getElementById('hi-score').textContent = hiScore;
+            }
+        }
+        
+        async function updateHiScore() {
+            const snapshot = await database.ref('userScores/' + currentUser.uid + '/scores/' + (currentLevel - 1)).once('value');
+            hiScore = snapshot.val() || 0;
+            document.getElementById('hi-score').textContent = hiScore;
+        }
+        
+        function updateActiveLevelButton() {
+            document.querySelectorAll('.level-btn').forEach(btn => {
+                btn.classList.remove('active', 'hard');
+                const level = parseInt(btn.dataset.level);
+                
+                if (level === currentLevel) {
+                    btn.classList.add('active');
+                }
+                
+                if (level > 5) {
+                    btn.classList.add('hard');
+                }
+            });
+        }
+        
+        async function endGame() {
+            clearInterval(timer);
+            gameActive = false;
+            gameScreen.style.display = 'none';
+            
+            // Update end screen
+            document.getElementById('end-level').textContent = currentLevel;
+            document.getElementById('end-score').textContent = score;
+            document.getElementById('end-hiscore').textContent = hiScore;
+            
+            // Hide continue button if max level
+            continueBtn.style.display = currentLevel < 10 ? 'block' : 'none';
+            
+            try {
+                // Security check
+                const gameDuration = Date.now() - gameStartTime;
+                if (gameDuration < 5000) { // Minimum 5 seconds per game
+                    throw new Error('Game too short');
+                }
+                
+                // Update user scores in Firebase
+                const nowDate = new Date();
+                const updates = {};
+                
+                // Check if this is a new high score
+                const currentHiScore = (await database.ref('userScores/' + currentUser.uid + '/scores/' + (currentLevel - 1)).once('value')).val() || 0;
+                const isNewHighScore = score > currentHiScore;
+                
+                if (isNewHighScore) {
+                    updates['userScores/' + currentUser.uid + '/scores/' + (currentLevel - 1)] = score;
+                    hiScore = score;
+                }
+                
+                // Update play count
+                updates['userScores/' + currentUser.uid + '/playCount/' + (currentLevel - 1)] = 
+                    ((await database.ref('userScores/' + currentUser.uid + '/playCount/' + (currentLevel - 1)).once('value')).val() || 0) + 1;
+                
+                // Update last played
+                updates['userScores/' + currentUser.uid + '/lastPlayed'] = nowDate.toISOString();
+                
+                // Add to history
+                const historyKey = nowDate.toISOString().split('T')[0].replace(/-/g, '');
+                updates['userScores/' + currentUser.uid + '/history/' + historyKey + '/' + nowDate.getTime()] = {
+                    level: currentLevel,
+                    score: score,
+                    timestamp: nowDate.toISOString(),
+                    gameHash: gameHash,
+                    duration: gameDuration
+                };
+                
+                // Check if we should unlock next level
+                if (currentLevel === maxUnlockedLevel && maxUnlockedLevel < 10 && score >= 50) {
+                    updates['userScores/' + currentUser.uid + '/maxUnlocked'] = maxUnlockedLevel + 1;
+                    maxUnlockedLevel++;
+                    
+                    // Update level buttons
+                    initializeLevelButtons();
+                }
+                
+                await database.ref().update(updates);
+                
+                // Show end screen
+                endScreen.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error saving score:', error);
+                alert('Game data not saved. Please play fairly and try again.');
+                endScreen.style.display = 'block';
+            }
+        }
+        
+        async function showStats() {
+            gameScreen.style.display = 'none';
+            statsScreen.style.display = 'block';
+            endScreen.style.display = 'none';
+            
+            try {
+                const userSnapshot = await database.ref('users/' + currentUser.uid).once('value');
+                const username = userSnapshot.val().username;
+                document.getElementById('stats-username').textContent = username;
+                
+                const statsSnapshot = await database.ref('userScores/' + currentUser.uid).once('value');
+                const userStats = statsSnapshot.val();
+                
+                // Show overall stats
+                const overallStats = document.getElementById('overall-stats');
+                const totalPlays = userStats.playCount.reduce((a, b) => a + b, 0);
+                const maxScore = Math.max(...userStats.scores);
+                const favoriteLevel = userStats.scores.indexOf(maxScore) + 1;
+                
+                overallStats.innerHTML = `
+                    <p>Total Games Played: ${totalPlays}</p>
+                    <p>Highest Score: ${maxScore} (Level ${favoriteLevel})</p>
+                    <p>Last Played: ${new Date(userStats.lastPlayed).toLocaleString()}</p>
+                    <p>Unlocked Levels: ${userStats.maxUnlocked || 1}/10</p>
+                `;
+                
+                // Initialize leaderboard
+                await updateLeaderboard();
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                alert('Error loading statistics. Please check your connection.');
+            }
+        }
+        
+        async function updateLeaderboard() {
+            const selectedLevel = parseInt(document.getElementById('leaderboard-select').value);
+            const leaderboardContainer = document.getElementById('leaderboard-container');
+            leaderboardContainer.innerHTML = '<p>Loading leaderboard...</p>';
+            
+            try {
+                // Get date ranges for filtering
+                const now = new Date();
+                let startDate = 0; // All time
+                
+                if (timeFilter === 'week') {
+                    const daysSinceSunday = now.getDay(); // 0 = Sunday
+                    const sunday = new Date(now);
+                    sunday.setDate(now.getDate() - daysSinceSunday);
+                    sunday.setHours(0, 0, 0, 0);
+                    startDate = sunday.getTime();
+                } else if (timeFilter === 'today') {
+                    const today = new Date(now);
+                    today.setHours(0, 0, 0, 0);
+                    startDate = today.getTime();
+                }
+                
+                // Get all users
+                const usersSnapshot = await database.ref('users').once('value');
+                const allUsers = usersSnapshot.val();
+                
+                // Get scores for selected time period
+                const scores = [];
+                
+                for (const userId in allUsers) {
+                    const userScoresSnapshot = await database.ref('userScores/' + userId).once('value');
+                    const userScores = userScoresSnapshot.val();
+                    
+                    if (userScores && userScores.history) {
+                        for (const dateKey in userScores.history) {
+                            for (const timestamp in userScores.history[dateKey]) {
+                                const record = userScores.history[dateKey][timestamp];
+                                const recordTime = new Date(record.timestamp).getTime();
+                                
+                                if (record.level === selectedLevel && recordTime >= startDate) {
+                                    scores.push({
+                                        username: allUsers[userId].username,
+                                        score: record.score,
+                                        timestamp: record.timestamp,
+                                        userId: userId,
+                                        duration: record.duration || 0
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if (scores.length === 0) {
+                    leaderboardContainer.innerHTML = '<p>No records for this period yet</p>';
+                    return;
+                }
+                
+                // Filter out suspicious scores (too fast or too high)
+                const filteredScores = scores.filter(score => {
+                    // Minimum 5 seconds per game
+                    if (score.duration > 0 && score.duration < 5000) return false;
+                    
+                    // Maximum possible score based on time
+                    const maxPossibleScore = Math.floor(score.duration / 1000) * (selectedLevel * 5);
+                    if (score.score > maxPossibleScore * 1.5) return false; // Allow 50% more than theoretical max
+                    
+                    return true;
+                });
+                
+                // Sort by score descending
+                filteredScores.sort((a, b) => b.score - a.score);
+                
+                // Get top 25 scores
+                const topScores = filteredScores.slice(0, 25);
+                
+                // Find user's best score and rank
+                const userBest = filteredScores.filter(s => s.userId === currentUser.uid)
+                                      .sort((a, b) => b.score - a.score)[0];
+                
+                let userRank = -1;
+                if (userBest) {
+                    userRank = filteredScores.findIndex(s => s.score <= userBest.score) + 1;
+                }
+                
+                let tableHTML = `
+                    <table>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Username</th>
+                            <th>Score</th>
+                            <th>Date</th>
+                        </tr>
+                `;
+                
+                // Add top scores
+                topScores.forEach((score, index) => {
+                    const isCurrentUser = score.userId === currentUser.uid;
+                    const date = new Date(score.timestamp).toLocaleDateString();
+                    
+                    tableHTML += `
+                        <tr ${isCurrentUser ? 'class="highlight"' : ''}>
+                            <td>${index + 1}</td>
+                            <td>${score.username} ${isCurrentUser ? ' (You)' : ''}</td>
+                            <td>${score.score}</td>
+                            <td>${date}</td>
+                        </tr>
+                    `;
+                });
+                
+                // Add user's position if not in top 25
+                if (userRank > 25 && userBest) {
+                    const date = new Date(userBest.timestamp).toLocaleDateString();
+                    tableHTML += `
+                        <tr><td colspan="4" style="text-align: center;">...</td></tr>
+                        <tr class="highlight">
+                            <td>${userRank}</td>
+                            <td>${userBest.username} (You)</td>
+                            <td>${userBest.score}</td>
+                            <td>${date}</td>
+                        </tr>
+                    `;
+                }
+                
+                tableHTML += '</table>';
+                
+                // Add user's position summary
+                if (userBest) {
+                    tableHTML += `
+                        <div style="margin-top: 15px; text-align: center;">
+                            <p>Your best: <strong>${userBest.score}</strong> (Rank #${userRank})</p>
+                        </div>
+                    `;
+                }
+                
+                leaderboardContainer.innerHTML = tableHTML;
+            } catch (error) {
+                console.error('Error loading leaderboard:', error);
+                leaderboardContainer.innerHTML = '<p>Error loading leaderboard</p>';
+            }
+        }
+        
+        async function updateTopLeaderboards() {
+            try {
+                // All Time
+                const allTimeSnapshot = await database.ref('scores/allTime').orderByValue().limitToLast(3).once('value');
+                updateLeaderboardPreview('all-time-leaderboard', allTimeSnapshot);
+                
+                // This Week
+                const weekSnapshot = await database.ref('scores/week').orderByValue().limitToLast(3).once('value');
+                updateLeaderboardPreview('week-leaderboard', weekSnapshot);
+                
+                // Today
+                const todaySnapshot = await database.ref('scores/today').orderByValue().limitToLast(3).once('value');
+                updateLeaderboardPreview('today-leaderboard', todaySnapshot);
+            } catch (error) {
+                console.error('Error loading top leaderboards:', error);
+            }
+        }
+        
+        function updateLeaderboardPreview(elementId, snapshot) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = '';
+            
+            if (!snapshot.exists()) {
+                element.innerHTML = '<div class="leaderboard-item"><span>No records yet</span></div>';
+                return;
+            }
+            
+            const scores = [];
+            snapshot.forEach(child => {
+                scores.push({
+                    username: child.key,
+                    score: child.val()
+                });
+            });
+            
+            // Sort descending
+            scores.sort((a, b) => b.score - a.score);
+            
+            scores.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = `leaderboard-item ${item.username === currentUser.uid ? 'highlight' : ''}`;
+                div.innerHTML = `<span>${index + 1}. ${item.username}</span> <span>${item.score}</span>`;
+                element.appendChild(div);
+            });
+        }
+        
+        // Initialize the game
+        initializeLevelButtons();
+        initializeLeaderboardSelect();
+    </script>
+</body>
+</html>
