@@ -1,4 +1,4 @@
-
+<--! Version 1.0.1 index.html Claude yozgan -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -270,6 +270,29 @@
             transition: all 0.3s ease-out;
         }
         
+        /* Table styles for leaderboard */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: var(--light);
+            font-weight: bold;
+        }
+        
+        tr.highlight {
+            background-color: rgba(52, 152, 219, 0.1);
+            font-weight: bold;
+        }
+        
         /* Mobile optimizations */
         @media (max-width: 400px) {
             .container {
@@ -294,13 +317,17 @@
                 font-size: 0.7rem;
                 padding: 5px;
             }
+            
+            th, td {
+                padding: 5px;
+                font-size: 0.85rem;
+            }
         }
     </style>
     
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.1/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.1/firebase-database-compat.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -328,15 +355,9 @@
             <div id="options"></div>
             
             <div id="leaderboard-preview">
-                <h3>Top Players</h3>
-                <div id="all-time-leaderboard">
-                    <div class="leaderboard-item"><span>All Time:</span> <span>Loading...</span></div>
-                </div>
-                <div id="week-leaderboard">
-                    <div class="leaderboard-item"><span>This Week:</span> <span>Loading...</span></div>
-                </div>
-                <div id="today-leaderboard">
-                    <div class="leaderboard-item"><span>Today:</span> <span>Loading...</span></div>
+                <h3>Top Players - Level <span id="current-level-display">1</span></h3>
+                <div id="top-leaderboard">
+                    <div class="leaderboard-item"><span>Loading...</span></div>
                 </div>
             </div>
             
@@ -384,6 +405,10 @@
                 Hi-score: <span id="end-hiscore">0</span>
             </div>
             
+            <div id="level-unlock-message" style="display: none; margin: 15px 0; padding: 10px; background-color: var(--secondary); color: white; border-radius: 5px;">
+                🎉 Level unlocked! You can now play Level <span id="unlocked-level">2</span>!
+            </div>
+            
             <button id="play-again-btn">Play Again</button>
             <button id="continue-btn">Next Level</button>
             <button id="end-stats-btn">View Stats</button>
@@ -392,7 +417,7 @@
         <!-- Level Locked Screen -->
         <div id="level-locked-screen">
             <h1>Level Locked!</h1>
-            <p>You need to complete level <span id="required-level">1</span> first!</p>
+            <p>You need to complete level <span id="required-level">1</span> with at least 50 points first!</p>
             <button id="unlock-btn">Go to Level <span id="unlock-level">1</span></button>
             <button id="locked-back-btn">Back to Game</button>
         </div>
@@ -406,20 +431,19 @@
         const firebaseConfig = {
             apiKey: "AIzaSyB6KORcPrlTQdwHbjAiVmxdgIGJ2A3FCp4",
             authDomain: "colordetector-a7a71.firebaseapp.com",
+            databaseURL: "https://colordetector-a7a71-default-rtdb.firebaseio.com",
             projectId: "colordetector-a7a71",
             storageBucket: "colordetector-a7a71.appspot.com",
             messagingSenderId: "643341320351",
-            appId: "1:643341320351:web:71c2aec0877441a837a2aa",
-            measurementId: "G-GZBRDB7KFY"
+            appId: "1:643341320351:web:71c2aec0877441a837a2aa"
         };
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const auth = firebase.auth();
         
         // Game variables
-        let currentUser = null;
+        let currentUsername = null;
         let score = 0;
         let hiScore = 0;
         let timeLeft = 30;
@@ -431,9 +455,6 @@
         let timeFilter = 'all';
         let gameActive = false;
         let gameStartTime = 0;
-        
-        // Security variables (to prevent cheating)
-        const gameHash = Math.random().toString(36).substring(2, 15);
         let lastUpdateTime = 0;
         
         // Color database
@@ -478,37 +499,18 @@
         const levelSelector = document.getElementById('level-selector');
         const timeBtns = document.querySelectorAll('.time-btn');
         const selectingIndicator = document.getElementById('selecting-indicator');
+        const leaderboardSelect = document.getElementById('leaderboard-select');
         
         // Initialize game
         startBtn.addEventListener('click', async () => {
             const username = usernameInput.value.trim();
-            if (username) {
+            if (username && username.length >= 3) {
                 try {
                     loginError.style.display = 'none';
                     startBtn.disabled = true;
                     startBtn.textContent = 'Loading...';
                     
-                    // Sign in anonymously
-                    const userCredential = await auth.signInAnonymously();
-                    currentUser = userCredential.user;
-                    
-                    // Check if username exists
-                    const usernameSnapshot = await database.ref('usernames/' + username.toLowerCase()).once('value');
-                    
-                    if (usernameSnapshot.exists() && usernameSnapshot.val() !== currentUser.uid) {
-                        // Username already taken by another user
-                        throw new Error('Username already taken');
-                    }
-                    
-                    // Set username in database
-                    await database.ref('users/' + currentUser.uid).set({
-                        username: username,
-                        lastLogin: new Date().toISOString(),
-                        gameHash: gameHash
-                    });
-                    
-                    // Reserve username
-                    await database.ref('usernames/' + username.toLowerCase()).set(currentUser.uid);
+                    currentUsername = username;
                     
                     // Load user data
                     await loadUserData();
@@ -517,22 +519,18 @@
                     loginScreen.style.display = 'none';
                     gameScreen.style.display = 'block';
                     updateHiScore();
+                    updateTopLeaderboard();
                     startGame();
                 } catch (error) {
                     console.error('Error starting game:', error);
-                    loginError.textContent = error.message === 'Username already taken' ? 
-                        'Username already taken. Please choose another.' : 
-                        'Error starting game. Please try again.';
+                    loginError.textContent = 'Error starting game. Please try again.';
                     loginError.style.display = 'block';
                     startBtn.disabled = false;
                     startBtn.textContent = 'Start Game';
-                    
-                    // Sign out if authentication succeeded but other steps failed
-                    if (currentUser) {
-                        await auth.signOut();
-                        currentUser = null;
-                    }
                 }
+            } else {
+                loginError.textContent = 'Username must be at least 3 characters long.';
+                loginError.style.display = 'block';
             }
         });
         
@@ -553,10 +551,12 @@
             if (currentLevel < 10) {
                 currentLevel++;
                 updateActiveLevelButton();
+                updateTopLeaderboard();
                 resetGame();
             } else {
                 currentLevel = 1;
                 updateActiveLevelButton();
+                updateTopLeaderboard();
                 resetGame();
             }
         });
@@ -570,6 +570,7 @@
             lockedScreen.style.display = 'none';
             currentLevel = parseInt(document.getElementById('unlock-level').textContent);
             updateActiveLevelButton();
+            updateTopLeaderboard();
             resetGame();
         });
         
@@ -577,6 +578,9 @@
             lockedScreen.style.display = 'none';
             gameScreen.style.display = 'block';
         });
+        
+        // Leaderboard select change
+        leaderboardSelect.addEventListener('change', updateLeaderboard);
         
         // Time filter buttons
         timeBtns.forEach(btn => {
@@ -593,7 +597,7 @@
             levelSelector.innerHTML = '';
             for (let i = 1; i <= 10; i++) {
                 const btn = document.createElement('button');
-                btn.className = `level-btn ${i === 1 ? 'active' : ''} ${i > maxUnlockedLevel ? 'locked' : ''} ${i > 5 ? 'hard' : ''}`;
+                btn.className = `level-btn ${i === currentLevel ? 'active' : ''} ${i > maxUnlockedLevel ? 'locked' : ''} ${i > 5 ? 'hard' : ''}`;
                 btn.dataset.level = i;
                 btn.textContent = i;
                 
@@ -610,6 +614,7 @@
                     if (level !== currentLevel) {
                         currentLevel = level;
                         updateActiveLevelButton();
+                        updateTopLeaderboard();
                         resetGame();
                     }
                 });
@@ -620,49 +625,42 @@
         
         // Initialize leaderboard select
         function initializeLeaderboardSelect() {
-            const select = document.getElementById('leaderboard-select');
-            select.innerHTML = '';
+            leaderboardSelect.innerHTML = '';
             for (let i = 1; i <= 10; i++) {
                 const option = document.createElement('option');
                 option.value = i;
                 option.textContent = `Level ${i}`;
-                select.appendChild(option);
+                leaderboardSelect.appendChild(option);
             }
+            leaderboardSelect.value = currentLevel;
         }
         
         // Load user data from Firebase
         async function loadUserData() {
-            const snapshot = await database.ref('userScores/' + currentUser.uid).once('value');
-            if (!snapshot.exists()) {
-                // Initialize with empty data
-                await database.ref('userScores/' + currentUser.uid).set({
-                    scores: Array(10).fill(0),
-                    playCount: Array(10).fill(0),
-                    lastPlayed: new Date().toISOString(),
-                    history: {},
-                    maxUnlocked: 1,
-                    gameHash: gameHash
-                });
-                maxUnlockedLevel = 1;
-            } else {
-                const data = snapshot.val();
-                maxUnlockedLevel = data.maxUnlocked || 1;
-                
-                // Security check
-                if (data.gameHash !== gameHash) {
-                    // Potential cheating detected
-                    await database.ref('userScores/' + currentUser.uid).update({
-                        gameHash: gameHash,
+            try {
+                const snapshot = await database.ref('users/' + currentUsername).once('value');
+                if (!snapshot.exists()) {
+                    // Initialize new user
+                    await database.ref('users/' + currentUsername).set({
                         scores: Array(10).fill(0),
-                        maxUnlocked: 1
+                        playCount: Array(10).fill(0),
+                        lastPlayed: new Date().toISOString(),
+                        history: {},
+                        maxUnlocked: 1,
+                        created: new Date().toISOString()
                     });
                     maxUnlockedLevel = 1;
+                } else {
+                    const data = snapshot.val();
+                    maxUnlockedLevel = data.maxUnlocked || 1;
                 }
+                
+                initializeLevelButtons();
+                initializeLeaderboardSelect();
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                throw error;
             }
-            
-            initializeLevelButtons();
-            initializeLeaderboardSelect();
-            updateTopLeaderboards();
         }
         
         // Game functions
@@ -683,37 +681,28 @@
             gameStartTime = Date.now();
             lastUpdateTime = Date.now();
             
-            // Use precise timer that only counts whole seconds
-            let lastSecond = Math.floor(Date.now() / 1000);
+            // Fixed timer - counts every second precisely
             timer = setInterval(() => {
-                const now = Math.floor(Date.now() / 1000);
-                if (now !== lastSecond) {
-                    lastSecond = now;
-                    updateTimer();
+                if (gameActive && timeLeft > 0) {
+                    timeLeft--;
+                    document.getElementById('timer').textContent = timeLeft;
+                    
+                    if (timeLeft <= 0) {
+                        endGame();
+                    }
                 }
-            }, 100);
+            }, 1000);
         }
         
         function getLevelTime() {
             // Decrease time as level increases
-            return Math.max(10, 35 - currentLevel * 2.5);
-        }
-        
-        function updateTimer() {
-            if (!gameActive) return;
-            
-            timeLeft--;
-            document.getElementById('timer').textContent = timeLeft;
-            
-            if (timeLeft <= 0) {
-                endGame();
-            }
+            return Math.max(10, 35 - Math.floor(currentLevel * 2.5));
         }
         
         function setupRound() {
             // Adjust difficulty based on level
-            const numOptions = Math.min(4 + Math.floor(currentLevel / 2), 8);
-            const colorPoolSize = Math.min(10 + currentLevel * 3, colorNames.length);
+            const numOptions = Math.min(4 + Math.floor(currentLevel / 2), 6);
+            const colorPoolSize = Math.min(10 + currentLevel * 2, colorNames.length);
             
             colors = [];
             const usedIndices = [];
@@ -739,7 +728,8 @@
             // Create options
             const optionsContainer = document.getElementById('options');
             optionsContainer.innerHTML = '';
-            optionsContainer.style.gridTemplateColumns = `repeat(${Math.min(3, Math.ceil(numOptions/2))}, 1fr)`;
+            const cols = numOptions <= 4 ? 2 : 3;
+            optionsContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
             
             colors.forEach((color, index) => {
                 const option = document.createElement('div');
@@ -786,18 +776,18 @@
         
         function getTextColor() {
             // For higher levels, sometimes make text color different from text meaning
-            if (currentLevel > 3 && Math.random() > 0.5) {
-                const wrongColor = colors.filter((_, i) => i !== correctIndex);
-                return wrongColor[Math.floor(Math.random() * wrongColor.length)].value;
+            if (currentLevel > 3 && Math.random() > 0.6) {
+                const wrongColors = colors.filter((_, i) => i !== correctIndex);
+                return wrongColors[Math.floor(Math.random() * wrongColors.length)].value;
             }
             return colors[correctIndex].value;
         }
         
-        async function checkAnswer(selectedIndex) {
+        function checkAnswer(selectedIndex) {
             if (!gameActive) return;
             
             const now = Date.now();
-            if (now - lastUpdateTime < 200) {
+            if (now - lastUpdateTime < 300) {
                 // Prevent rapid clicking
                 return;
             }
@@ -811,15 +801,16 @@
                 feedback.textContent = `+${pointsEarned}`;
                 feedback.style.color = '#2ecc71';
                 
+                // Bonus time for streaks
                 if (score % (currentLevel * 50) === 0) {
                     timeLeft += 3;
                     feedback.textContent = `+${pointsEarned} (+3s)`;
                 }
             } else {
-                score = Math.max(0, score - 2);
-                feedback.textContent = '-2';
+                score = Math.max(0, score - 3);
+                feedback.textContent = '-3';
                 feedback.style.color = '#e74c3c';
-                timeLeft = Math.max(3, timeLeft - 1);
+                timeLeft = Math.max(1, timeLeft - 1);
             }
             
             feedback.style.opacity = '1';
@@ -834,9 +825,10 @@
             setupRound();
         }
         
-        async function updateDisplay() {
+        function updateDisplay() {
             document.getElementById('score').textContent = score;
             document.getElementById('current-level').textContent = currentLevel;
+            document.getElementById('current-level-display').textContent = currentLevel;
             document.getElementById('timer').textContent = timeLeft;
             
             if (score > hiScore) {
@@ -846,18 +838,30 @@
         }
         
         async function updateHiScore() {
-            const snapshot = await database.ref('userScores/' + currentUser.uid + '/scores/' + (currentLevel - 1)).once('value');
-            hiScore = snapshot.val() || 0;
-            document.getElementById('hi-score').textContent = hiScore;
+            try {
+                const snapshot = await database.ref('users/' + currentUsername + '/scores/' + (currentLevel - 1)).once('value');
+                hiScore = snapshot.val() || 0;
+                document.getElementById('hi-score').textContent = hiScore;
+            } catch (error) {
+                console.error('Error loading hi-score:', error);
+                hiScore = 0;
+                document.getElementById('hi-score').textContent = hiScore;
+            }
         }
         
         function updateActiveLevelButton() {
             document.querySelectorAll('.level-btn').forEach(btn => {
-                btn.classList.remove('active', 'hard');
+                btn.classList.remove('active');
                 const level = parseInt(btn.dataset.level);
                 
                 if (level === currentLevel) {
                     btn.classList.add('active');
+                }
+                
+                if (level <= maxUnlockedLevel) {
+                    btn.classList.remove('locked');
+                } else {
+                    btn.classList.add('locked');
                 }
                 
                 if (level > 5) {
@@ -880,10 +884,12 @@
             continueBtn.style.display = currentLevel < 10 ? 'block' : 'none';
             
             try {
-                // Security check
+                // Game validation
                 const gameDuration = Date.now() - gameStartTime;
-                if (gameDuration < 5000) { // Minimum 5 seconds per game
-                    throw new Error('Game too short');
+                if (gameDuration < 3000) { // Minimum 3 seconds per game
+                    console.warn('Game too short');
+                    endScreen.style.display = 'block';
+                    return;
                 }
                 
                 // Update user scores in Firebase
@@ -891,48 +897,59 @@
                 const updates = {};
                 
                 // Check if this is a new high score
-                const currentHiScore = (await database.ref('userScores/' + currentUser.uid + '/scores/' + (currentLevel - 1)).once('value')).val() || 0;
+                const currentHiScoreSnapshot = await database.ref('users/' + currentUsername + '/scores/' + (currentLevel - 1)).once('value');
+                const currentHiScore = currentHiScoreSnapshot.val() || 0;
                 const isNewHighScore = score > currentHiScore;
                 
                 if (isNewHighScore) {
-                    updates['userScores/' + currentUser.uid + '/scores/' + (currentLevel - 1)] = score;
+                    updates['users/' + currentUsername + '/scores/' + (currentLevel - 1)] = score;
                     hiScore = score;
                 }
                 
                 // Update play count
-                updates['userScores/' + currentUser.uid + '/playCount/' + (currentLevel - 1)] = 
-                    ((await database.ref('userScores/' + currentUser.uid + '/playCount/' + (currentLevel - 1)).once('value')).val() || 0) + 1;
+                const playCountSnapshot = await database.ref('users/' + currentUsername + '/playCount/' + (currentLevel - 1)).once('value');
+                const currentPlayCount = playCountSnapshot.val() || 0;
+                updates['users/' + currentUsername + '/playCount/' + (currentLevel - 1)] = currentPlayCount + 1;
                 
                 // Update last played
-                updates['userScores/' + currentUser.uid + '/lastPlayed'] = nowDate.toISOString();
+                updates['users/' + currentUsername + '/lastPlayed'] = nowDate.toISOString();
                 
                 // Add to history
                 const historyKey = nowDate.toISOString().split('T')[0].replace(/-/g, '');
-                updates['userScores/' + currentUser.uid + '/history/' + historyKey + '/' + nowDate.getTime()] = {
+                updates['users/' + currentUsername + '/history/' + historyKey + '/' + nowDate.getTime()] = {
                     level: currentLevel,
                     score: score,
                     timestamp: nowDate.toISOString(),
-                    gameHash: gameHash,
                     duration: gameDuration
                 };
                 
                 // Check if we should unlock next level
+                let levelUnlocked = false;
                 if (currentLevel === maxUnlockedLevel && maxUnlockedLevel < 10 && score >= 50) {
-                    updates['userScores/' + currentUser.uid + '/maxUnlocked'] = maxUnlockedLevel + 1;
+                    updates['users/' + currentUsername + '/maxUnlocked'] = maxUnlockedLevel + 1;
                     maxUnlockedLevel++;
+                    levelUnlocked = true;
+                    
+                    // Show unlock message
+                    document.getElementById('unlocked-level').textContent = maxUnlockedLevel;
+                    document.getElementById('level-unlock-message').style.display = 'block';
                     
                     // Update level buttons
                     initializeLevelButtons();
+                } else {
+                    document.getElementById('level-unlock-message').style.display = 'none';
                 }
                 
                 await database.ref().update(updates);
+                
+                // Update leaderboard
+                updateTopLeaderboard();
                 
                 // Show end screen
                 endScreen.style.display = 'block';
                 
             } catch (error) {
                 console.error('Error saving score:', error);
-                alert('Game data not saved. Please play fairly and try again.');
                 endScreen.style.display = 'block';
             }
         }
@@ -943,12 +960,16 @@
             endScreen.style.display = 'none';
             
             try {
-                const userSnapshot = await database.ref('users/' + currentUser.uid).once('value');
-                const username = userSnapshot.val().username;
-                document.getElementById('stats-username').textContent = username;
+                document.getElementById('stats-username').textContent = currentUsername;
                 
-                const statsSnapshot = await database.ref('userScores/' + currentUser.uid).once('value');
-                const userStats = statsSnapshot.val();
+                const userSnapshot = await database.ref('users/' + currentUsername).once('value');
+                const userStats = userSnapshot.val() || {
+                    scores: Array(10).fill(0),
+                    playCount: Array(10).fill(0),
+                    lastPlayed: new Date().toISOString(),
+                    history: {},
+                    maxUnlocked: 1
+                };
                 
                 // Show overall stats
                 const overallStats = document.getElementById('overall-stats');
@@ -963,16 +984,18 @@
                     <p>Unlocked Levels: ${userStats.maxUnlocked || 1}/10</p>
                 `;
                 
+                // Set leaderboard to current level
+                leaderboardSelect.value = currentLevel;
+                
                 // Initialize leaderboard
                 await updateLeaderboard();
             } catch (error) {
                 console.error('Error loading stats:', error);
-                alert('Error loading statistics. Please check your connection.');
             }
         }
         
         async function updateLeaderboard() {
-            const selectedLevel = parseInt(document.getElementById('leaderboard-select').value);
+            const selectedLevel = parseInt(leaderboardSelect.value);
             const leaderboardContainer = document.getElementById('leaderboard-container');
             leaderboardContainer.innerHTML = '<p>Loading leaderboard...</p>';
             
@@ -995,27 +1018,25 @@
                 
                 // Get all users
                 const usersSnapshot = await database.ref('users').once('value');
-                const allUsers = usersSnapshot.val();
+                const allUsers = usersSnapshot.val() || {};
                 
                 // Get scores for selected time period
                 const scores = [];
                 
-                for (const userId in allUsers) {
-                    const userScoresSnapshot = await database.ref('userScores/' + userId).once('value');
-                    const userScores = userScoresSnapshot.val();
+                for (const username in allUsers) {
+                    const userStats = allUsers[username];
                     
-                    if (userScores && userScores.history) {
-                        for (const dateKey in userScores.history) {
-                            for (const timestamp in userScores.history[dateKey]) {
-                                const record = userScores.history[dateKey][timestamp];
+                    if (userStats && userStats.history) {
+                        for (const dateKey in userStats.history) {
+                            for (const timestamp in userStats.history[dateKey]) {
+                                const record = userStats.history[dateKey][timestamp];
                                 const recordTime = new Date(record.timestamp).getTime();
                                 
                                 if (record.level === selectedLevel && recordTime >= startDate) {
                                     scores.push({
-                                        username: allUsers[userId].username,
+                                        username: username,
                                         score: record.score,
                                         timestamp: record.timestamp,
-                                        userId: userId,
                                         duration: record.duration || 0
                                     });
                                 }
@@ -1029,26 +1050,22 @@
                     return;
                 }
                 
-                // Filter out suspicious scores (too fast or too high)
+                // Filter out suspicious scores
                 const filteredScores = scores.filter(score => {
-                    // Minimum 5 seconds per game
-                    if (score.duration > 0 && score.duration < 5000) return false;
-                    
-                    // Maximum possible score based on time
+                    if (score.duration > 0 && score.duration < 3000) return false;
                     const maxPossibleScore = Math.floor(score.duration / 1000) * (selectedLevel * 5);
-                    if (score.score > maxPossibleScore * 1.5) return false; // Allow 50% more than theoretical max
-                    
+                    if (score.score > maxPossibleScore * 2) return false;
                     return true;
                 });
                 
                 // Sort by score descending
                 filteredScores.sort((a, b) => b.score - a.score);
                 
-                // Get top 25 scores
-                const topScores = filteredScores.slice(0, 25);
+                // Get top 20 scores
+                const topScores = filteredScores.slice(0, 20);
                 
                 // Find user's best score and rank
-                const userBest = filteredScores.filter(s => s.userId === currentUser.uid)
+                const userBest = filteredScores.filter(s => s.username === currentUsername)
                                       .sort((a, b) => b.score - a.score)[0];
                 
                 let userRank = -1;
@@ -1068,21 +1085,21 @@
                 
                 // Add top scores
                 topScores.forEach((score, index) => {
-                    const isCurrentUser = score.userId === currentUser.uid;
+                    const isCurrentUser = score.username === currentUsername;
                     const date = new Date(score.timestamp).toLocaleDateString();
                     
                     tableHTML += `
                         <tr ${isCurrentUser ? 'class="highlight"' : ''}>
                             <td>${index + 1}</td>
-                            <td>${score.username} ${isCurrentUser ? ' (You)' : ''}</td>
+                            <td>${score.username}${isCurrentUser ? ' (You)' : ''}</td>
                             <td>${score.score}</td>
                             <td>${date}</td>
                         </tr>
                     `;
                 });
                 
-                // Add user's position if not in top 25
-                if (userRank > 25 && userBest) {
+                // Add user's position if not in top 20
+                if (userRank > 20 && userBest) {
                     const date = new Date(userBest.timestamp).toLocaleDateString();
                     tableHTML += `
                         <tr><td colspan="4" style="text-align: center;">...</td></tr>
@@ -1113,50 +1130,46 @@
             }
         }
         
-        async function updateTopLeaderboards() {
+        async function updateTopLeaderboard() {
             try {
-                // All Time
-                const allTimeSnapshot = await database.ref('scores/allTime').orderByValue().limitToLast(3).once('value');
-                updateLeaderboardPreview('all-time-leaderboard', allTimeSnapshot);
+                // Get all users for current level
+                const usersSnapshot = await database.ref('users').once('value');
+                const allUsers = usersSnapshot.val() || {};
                 
-                // This Week
-                const weekSnapshot = await database.ref('scores/week').orderByValue().limitToLast(3).once('value');
-                updateLeaderboardPreview('week-leaderboard', weekSnapshot);
+                const levelScores = [];
                 
-                // Today
-                const todaySnapshot = await database.ref('scores/today').orderByValue().limitToLast(3).once('value');
-                updateLeaderboardPreview('today-leaderboard', todaySnapshot);
+                for (const username in allUsers) {
+                    const userStats = allUsers[username];
+                    if (userStats && userStats.scores && userStats.scores[currentLevel - 1]) {
+                        levelScores.push({
+                            username: username,
+                            score: userStats.scores[currentLevel - 1]
+                        });
+                    }
+                }
+                
+                // Sort by score descending
+                levelScores.sort((a, b) => b.score - a.score);
+                
+                // Get top 3
+                const topScores = levelScores.slice(0, 3);
+                
+                const topLeaderboard = document.getElementById('top-leaderboard');
+                topLeaderboard.innerHTML = '';
+                
+                if (topScores.length === 0) {
+                    topLeaderboard.innerHTML = '<div class="leaderboard-item"><span>No records yet</span></div>';
+                } else {
+                    topScores.forEach((item, index) => {
+                        const div = document.createElement('div');
+                        div.className = `leaderboard-item ${item.username === currentUsername ? 'highlight' : ''}`;
+                        div.innerHTML = `<span>${index + 1}. ${item.username}${item.username === currentUsername ? ' (You)' : ''}</span> <span>${item.score}</span>`;
+                        topLeaderboard.appendChild(div);
+                    });
+                }
             } catch (error) {
-                console.error('Error loading top leaderboards:', error);
+                console.error('Error loading top leaderboard:', error);
             }
-        }
-        
-        function updateLeaderboardPreview(elementId, snapshot) {
-            const element = document.getElementById(elementId);
-            element.innerHTML = '';
-            
-            if (!snapshot.exists()) {
-                element.innerHTML = '<div class="leaderboard-item"><span>No records yet</span></div>';
-                return;
-            }
-            
-            const scores = [];
-            snapshot.forEach(child => {
-                scores.push({
-                    username: child.key,
-                    score: child.val()
-                });
-            });
-            
-            // Sort descending
-            scores.sort((a, b) => b.score - a.score);
-            
-            scores.forEach((item, index) => {
-                const div = document.createElement('div');
-                div.className = `leaderboard-item ${item.username === currentUser.uid ? 'highlight' : ''}`;
-                div.innerHTML = `<span>${index + 1}. ${item.username}</span> <span>${item.score}</span>`;
-                element.appendChild(div);
-            });
         }
         
         // Initialize the game
