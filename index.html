@@ -1,4 +1,3 @@
-<!--   Claude yozgan -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -70,7 +69,7 @@
             font-size: 1.1rem;
         }
         
-        input, button, select {
+        input, button, select, textarea {
             width: 100%;
             padding: 12px;
             margin: 8px 0;
@@ -78,6 +77,11 @@
             border: 2px solid #ddd;
             font-size: 1rem;
             -webkit-appearance: none;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
         }
         
         button {
@@ -293,6 +297,269 @@
             font-weight: bold;
         }
         
+        /* Comments Section Styles */
+        #comments-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #e8e8e8;
+            text-align: left;
+        }
+        
+        #comments-section h3 {
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-size: 1rem;
+            text-align: center;
+        }
+        
+        .comment-form {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .comment-input-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 20px;
+            border: 2px solid #e8e8e8;
+            transition: border-color 0.2s;
+        }
+        
+        .comment-input-container:focus-within {
+            border-color: var(--primary);
+            background: white;
+        }
+        
+        .comment-form textarea {
+            flex: 1;
+            border: none;
+            background: transparent;
+            resize: none;
+            padding: 8px 0;
+            font-size: 0.9rem;
+            max-height: 100px;
+            min-height: 20px;
+            overflow-y: auto;
+            margin: 0;
+            outline: none;
+            font-family: inherit;
+            line-height: 1.4;
+        }
+        
+        .comment-form textarea::placeholder {
+            color: #999;
+        }
+        
+        .send-btn {
+            background: var(--primary);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: 0;
+            padding: 0;
+            flex-shrink: 0;
+        }
+        
+        .send-btn:hover:not(:disabled) {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+        
+        .send-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .send-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: white;
+            transform: translateX(1px);
+        }
+        
+        .char-counter {
+            position: absolute;
+            bottom: -20px;
+            right: 0;
+            font-size: 0.7rem;
+            color: #999;
+        }
+        
+        .char-counter.warning {
+            color: var(--warning);
+        }
+        
+        .char-counter.danger {
+            color: var(--danger);
+        }
+        
+        .comment-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+        
+        .comment-author {
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        .comment-time {
+            color: #666;
+        }
+        
+        .comment-text {
+            color: var(--dark);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .comment-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .like-btn {
+            background: none;
+            border: 1px solid #ddd;
+            padding: 4px 8px;
+            border-radius: 15px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+            width: auto;
+            margin: 0;
+        }
+        
+        .like-btn.liked {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+        
+        .like-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .like-btn.liked:hover {
+            background: #27ae60;
+        }
+        
+        .reply-btn {
+            background: none;
+            border: 1px solid #ddd;
+            padding: 4px 8px;
+            border-radius: 15px;
+            color: #666;
+            cursor: pointer;
+            font-size: 0.8rem;
+            width: auto;
+            margin: 0;
+        }
+        
+        .reply-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .replies {
+            margin-top: 10px;
+            margin-left: 15px;
+            border-left: 2px solid #e8e8e8;
+            padding-left: 10px;
+        }
+        
+        .reply-form {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            display: none;
+        }
+        
+        .reply-form textarea {
+            font-size: 0.85rem;
+            min-height: 60px;
+        }
+        
+        .reply-form button {
+            font-size: 0.8rem;
+            padding: 6px 12px;
+        }
+        
+        .sort-controls {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .sort-btn {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            width: auto;
+            margin: 0;
+        }
+        
+        .sort-btn.active {
+            background-color: var(--primary);
+        }
+        
+        .comments-empty {
+            text-align: center;
+            color: #888;
+            font-style: italic;
+            padding: 20px;
+        }
+        
+        .dev-apps-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--warning);
+            color: var(--dark);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            width: auto;
+            margin: 0;
+            transition: all 0.3s;
+        }
+        
+        .dev-apps-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
         /* Mobile optimizations */
         @media (max-width: 400px) {
             .container {
@@ -321,6 +588,21 @@
             th, td {
                 padding: 5px;
                 font-size: 0.85rem;
+            }
+            
+            .comment-item {
+                padding: 10px;
+            }
+            
+            .comment-text {
+                font-size: 0.85rem;
+            }
+            
+            .dev-apps-btn {
+                bottom: 15px;
+                right: 15px;
+                padding: 8px 12px;
+                font-size: 0.7rem;
             }
         }
     </style>
@@ -353,6 +635,32 @@
             <div id="target">Color Name</div>
             
             <div id="options"></div>
+            
+            <!-- Comments Section -->
+            <div id="comments-section">
+                <h3>💬 Game Comments</h3>
+                
+                <div class="comment-form">
+                    <div class="comment-input-container">
+                        <textarea id="new-comment" placeholder="Share your thoughts..." maxlength="500"></textarea>
+                        <button class="send-btn" id="post-comment" disabled>
+                            <svg viewBox="0 0 24 24">
+                                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="char-counter" id="char-counter">0/500</div>
+                </div>
+                
+                <div class="sort-controls">
+                    <button class="sort-btn active" data-sort="recent">Most Recent</button>
+                    <button class="sort-btn" data-sort="liked">Most Liked</button>
+                </div>
+                
+                <div id="comments-list">
+                    <div class="comments-empty">No comments yet. Be the first to share your thoughts!</div>
+                </div>
+            </div>
             
             <div id="leaderboard-preview">
                 <h3>Top Players - Level <span id="current-level-display">1</span></h3>
@@ -423,6 +731,11 @@
         </div>
     </div>
     
+    <!-- Dev Apps Button -->
+    <button class="dev-apps-btn" onclick="window.open('https://behzodram.github.io/Portfolio/', '_blank')">
+        🔗 Dev another apps
+    </button>
+    
     <div class="feedback" id="feedback"></div>
     <div class="selecting" id="selecting-indicator" style="display: none;"></div>
 
@@ -456,6 +769,7 @@
         let gameActive = false;
         let gameStartTime = 0;
         let lastUpdateTime = 0;
+        let currentCommentSort = 'recent';
         
         // Color database
         const colorNames = [
@@ -501,37 +815,96 @@
         const selectingIndicator = document.getElementById('selecting-indicator');
         const leaderboardSelect = document.getElementById('leaderboard-select');
         
-        // Initialize game
+        // Comments elements
+        const newCommentTextarea = document.getElementById('new-comment');
+        const postCommentBtn = document.getElementById('post-comment');
+        const commentsList = document.getElementById('comments-list');
+        const sortBtns = document.querySelectorAll('.sort-btn');
+        const charCounter = document.getElementById('char-counter');
+        
         startBtn.addEventListener('click', async () => {
             const username = usernameInput.value.trim();
             if (username && username.length >= 3) {
-                try {
-                    loginError.style.display = 'none';
-                    startBtn.disabled = true;
-                    startBtn.textContent = 'Loading...';
-                    
-                    currentUsername = username;
-                    
-                    // Load user data
-                    await loadUserData();
-                    
-                    // Show game screen
-                    loginScreen.style.display = 'none';
-                    gameScreen.style.display = 'block';
+                // Remove try-catch to prevent blocking
+                loginError.style.display = 'none';
+                startBtn.disabled = true;
+                startBtn.textContent = 'Loading...';
+                
+                currentUsername = username;
+                
+                // Show game immediately
+                loginScreen.style.display = 'none';
+                gameScreen.style.display = 'block';
+                
+                // Initialize with defaults and start game right away
+                hiScore = 0;
+                maxUnlockedLevel = 1;
+                document.getElementById('hi-score').textContent = '0';
+                document.getElementById('top-leaderboard').innerHTML = '<div class="leaderboard-item"><span>Loading...</span></div>';
+                commentsList.innerHTML = '<div class="comments-empty">Loading comments...</div>';
+                
+                initializeLevelButtons();
+                initializeLeaderboardSelect();
+                startGame();
+                
+                // Load all data in background without blocking
+                loadUserDataOptimized().then(() => {
                     updateHiScore();
-                    updateTopLeaderboard();
-                    startGame();
-                } catch (error) {
-                    console.error('Error starting game:', error);
-                    loginError.textContent = 'Error starting game. Please try again.';
-                    loginError.style.display = 'block';
-                    startBtn.disabled = false;
-                    startBtn.textContent = 'Start Game';
-                }
+                    initializeLevelButtons();
+                });
+                updateTopLeaderboard();
+                loadComments();
+                
             } else {
                 loginError.textContent = 'Username must be at least 3 characters long.';
                 loginError.style.display = 'block';
             }
+        });
+        
+        // Comments event listeners
+        newCommentTextarea.addEventListener('input', function() {
+            const length = this.value.length;
+            const maxLength = 500;
+            
+            // Update character counter
+            charCounter.textContent = `${length}/${maxLength}`;
+            
+            // Update counter color
+            charCounter.className = 'char-counter';
+            if (length > maxLength * 0.8) {
+                charCounter.classList.add('warning');
+            }
+            if (length > maxLength * 0.95) {
+                charCounter.classList.remove('warning');
+                charCounter.classList.add('danger');
+            }
+            
+            // Enable/disable send button
+            postCommentBtn.disabled = length === 0 || length > maxLength || !currentUsername;
+            
+            // Auto-resize textarea
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+        });
+        
+        newCommentTextarea.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (!postCommentBtn.disabled) {
+                    postComment();
+                }
+            }
+        });
+        
+        postCommentBtn.addEventListener('click', postComment);
+        
+        sortBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                currentCommentSort = this.dataset.sort;
+                document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                loadComments();
+            });
         });
         
         // Other event listeners
@@ -592,6 +965,402 @@
             });
         });
         
+        // Comments functions
+        async function postComment() {
+            const commentText = newCommentTextarea.value.trim();
+            if (!commentText || !currentUsername || postCommentBtn.disabled) return;
+            
+            try {
+                // Optimistic UI update
+                const tempComment = {
+                    id: 'temp-' + Date.now(),
+                    author: currentUsername,
+                    text: commentText,
+                    timestamp: Date.now(),
+                    likes: 0,
+                    likedBy: {},
+                    replies: {},
+                    sending: true
+                };
+                
+                // Add to UI immediately
+                const comments = getCurrentComments();
+                comments.unshift(tempComment);
+                renderComments(comments);
+                
+                // Clear input
+                newCommentTextarea.value = '';
+                newCommentTextarea.style.height = 'auto';
+                charCounter.textContent = '0/500';
+                charCounter.className = 'char-counter';
+                postCommentBtn.disabled = true;
+                
+                // Send to Firebase
+                const commentData = {
+                    author: currentUsername,
+                    text: commentText,
+                    timestamp: Date.now(),
+                    likes: 0,
+                    likedBy: {},
+                    replies: {}
+                };
+                
+                await database.ref('comments').push(commentData);
+                
+                // Reload comments to get real data
+                setTimeout(() => loadComments(), 500);
+                
+            } catch (error) {
+                console.warn('Error posting comment:', error);
+                
+                // Show error message
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = `
+                    position: fixed; top: 20px; right: 20px; z-index: 1000;
+                    background: var(--danger); color: white; padding: 10px 15px;
+                    border-radius: 5px; font-size: 0.8rem;
+                `;
+                errorDiv.textContent = 'Failed to post comment. Please try again.';
+                document.body.appendChild(errorDiv);
+                
+                setTimeout(() => {
+                    if (errorDiv && errorDiv.parentNode) {
+                        errorDiv.parentNode.removeChild(errorDiv);
+                    }
+                }, 3000);
+                
+                // Reload comments to remove temp comment
+                loadComments();
+            }
+        }
+        
+        function getCurrentComments() {
+            // Get current comments from DOM for optimistic updates
+            const commentElements = commentsList.querySelectorAll('.comment-item');
+            const comments = [];
+            
+            commentElements.forEach(element => {
+                if (!element.dataset.parsed) {
+                    const authorEl = element.querySelector('.comment-author');
+                    const textEl = element.querySelector('.comment-text');
+                    const timeEl = element.querySelector('.comment-time');
+                    const likeBtn = element.querySelector('.like-btn');
+                    
+                    if (authorEl && textEl && timeEl) {
+                        comments.push({
+                            id: element.dataset.id || 'unknown-' + Date.now(),
+                            author: authorEl.textContent.trim(),
+                            text: textEl.textContent.trim(),
+                            timestamp: Date.now(), // Approximate
+                            likes: parseInt(likeBtn ? likeBtn.textContent.replace('👍', '').trim() : '0') || 0,
+                            likedBy: {},
+                            replies: {}
+                        });
+                    }
+                }
+            });
+            
+            return comments;
+        }
+        
+        async function loadComments() {
+            try {
+                // Add timeout to prevent hanging
+                const commentsPromise = database.ref('comments').once('value');
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Comments loading timeout')), 3000)
+                );
+                
+                const snapshot = await Promise.race([commentsPromise, timeoutPromise]);
+                const commentsData = snapshot.val() || {};
+                
+                const comments = Object.keys(commentsData).map(key => ({
+                    id: key,
+                    ...commentsData[key]
+                }));
+                
+                // Sort comments
+                if (currentCommentSort === 'liked') {
+                    comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+                } else {
+                    comments.sort((a, b) => b.timestamp - a.timestamp);
+                }
+                
+                renderComments(comments);
+            } catch (error) {
+                console.warn('Error loading comments:', error);
+                commentsList.innerHTML = '<div class="comments-empty">Comments will load shortly...</div>';
+                
+                // Retry after delay
+                setTimeout(() => {
+                    database.ref('comments').once('value').then(snapshot => {
+                        const commentsData = snapshot.val() || {};
+                        const comments = Object.keys(commentsData).map(key => ({
+                            id: key,
+                            ...commentsData[key]
+                        }));
+                        if (currentCommentSort === 'liked') {
+                            comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+                        } else {
+                            comments.sort((a, b) => b.timestamp - a.timestamp);
+                        }
+                        renderComments(comments);
+                    }).catch(() => {
+                        commentsList.innerHTML = '<div class="comments-empty">No comments yet. Be the first to share your thoughts!</div>';
+                    });
+                }, 2000);
+            }
+        }
+        
+        function renderComments(comments) {
+            if (comments.length === 0) {
+                commentsList.innerHTML = '<div class="comments-empty">No comments yet. Be the first to share your thoughts!</div>';
+                return;
+            }
+            
+            commentsList.innerHTML = comments.map(comment => {
+                const sendingClass = comment.sending ? 'style="opacity: 0.6;"' : '';
+                const sendingIndicator = comment.sending ? '<span style="font-size:0.7rem;color:#999;"> • Sending...</span>' : '';
+                
+                return `
+                <div class="comment-item" data-id="${comment.id}" ${sendingClass}>
+                    <div class="comment-header">
+                        <span class="comment-author">${escapeHtml(comment.author)}</span>
+                        <span class="comment-time">${formatTime(comment.timestamp)}${sendingIndicator}</span>
+                    </div>
+                    <div class="comment-text">${escapeHtml(comment.text)}</div>
+                    <div class="comment-actions">
+                        <button class="like-btn ${comment.likedBy && comment.likedBy[currentUsername] ? 'liked' : ''}" 
+                                onclick="toggleLike('${comment.id}')" ${comment.sending ? 'disabled' : ''}>
+                            👍 ${comment.likes || 0}
+                        </button>
+                        <button class="reply-btn" onclick="toggleReplyForm('${comment.id}')" ${comment.sending ? 'disabled' : ''}>
+                            💬 Reply
+                        </button>
+                    </div>
+                    <div class="reply-form" id="reply-form-${comment.id}">
+                        <textarea placeholder="Write a reply..." id="reply-text-${comment.id}" maxlength="300"></textarea>
+                        <button onclick="postReply('${comment.id}')">Post Reply</button>
+                        <button onclick="cancelReply('${comment.id}')">Cancel</button>
+                    </div>
+                    ${renderReplies(comment.replies || {}, comment.id)}
+                </div>
+            `}).join('');
+        }
+        
+        function renderReplies(replies, parentId) {
+            const repliesArray = Object.keys(replies).map(key => ({
+                id: key,
+                ...replies[key]
+            }));
+            
+            if (repliesArray.length === 0) return '';
+            
+            repliesArray.sort((a, b) => a.timestamp - b.timestamp);
+            
+            return `
+                <div class="replies">
+                    ${repliesArray.map(reply => `
+                        <div class="comment-item">
+                            <div class="comment-header">
+                                <span class="comment-author">${escapeHtml(reply.author)}</span>
+                                <span class="comment-time">${formatTime(reply.timestamp)}</span>
+                            </div>
+                            <div class="comment-text">${escapeHtml(reply.text)}</div>
+                            <div class="comment-actions">
+                                <button class="like-btn ${reply.likedBy && reply.likedBy[currentUsername] ? 'liked' : ''}" 
+                                        onclick="toggleReplyLike('${parentId}', '${reply.id}')">
+                                    👍 ${reply.likes || 0}
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        async function toggleLike(commentId) {
+            if (!currentUsername || commentId.startsWith('temp-')) return;
+            
+            try {
+                const commentRef = database.ref(`comments/${commentId}`);
+                const snapshot = await commentRef.once('value');
+                const comment = snapshot.val();
+                
+                if (!comment) return;
+                
+                const likedBy = comment.likedBy || {};
+                const currentLikes = comment.likes || 0;
+                
+                if (likedBy[currentUsername]) {
+                    // Unlike
+                    delete likedBy[currentUsername];
+                    await commentRef.update({
+                        likes: Math.max(0, currentLikes - 1),
+                        likedBy: likedBy
+                    });
+                } else {
+                    // Like
+                    likedBy[currentUsername] = true;
+                    await commentRef.update({
+                        likes: currentLikes + 1,
+                        likedBy: likedBy
+                    });
+                }
+                
+                loadComments();
+            } catch (error) {
+                console.warn('Error toggling like:', error);
+            }
+        }
+        
+        async function toggleReplyLike(parentId, replyId) {
+            if (!currentUsername || parentId.startsWith('temp-')) return;
+            
+            try {
+                const replyRef = database.ref(`comments/${parentId}/replies/${replyId}`);
+                const snapshot = await replyRef.once('value');
+                const reply = snapshot.val();
+                
+                if (!reply) return;
+                
+                const likedBy = reply.likedBy || {};
+                const currentLikes = reply.likes || 0;
+                
+                if (likedBy[currentUsername]) {
+                    delete likedBy[currentUsername];
+                    await replyRef.update({
+                        likes: Math.max(0, currentLikes - 1),
+                        likedBy: likedBy
+                    });
+                } else {
+                    likedBy[currentUsername] = true;
+                    await replyRef.update({
+                        likes: currentLikes + 1,
+                        likedBy: likedBy
+                    });
+                }
+                
+                loadComments();
+            } catch (error) {
+                console.warn('Error toggling reply like:', error);
+            }
+        }
+        
+        function toggleReplyForm(commentId) {
+            const replyForm = document.getElementById(`reply-form-${commentId}`);
+            if (replyForm.style.display === 'block') {
+                replyForm.style.display = 'none';
+            } else {
+                // Hide all other reply forms
+                document.querySelectorAll('.reply-form').forEach(form => {
+                    form.style.display = 'none';
+                });
+                replyForm.style.display = 'block';
+                document.getElementById(`reply-text-${commentId}`).focus();
+            }
+        }
+        
+        async function postReply(parentId) {
+            if (parentId.startsWith('temp-')) return;
+            
+            const replyText = document.getElementById(`reply-text-${parentId}`).value.trim();
+            if (!replyText || !currentUsername) return;
+            
+            if (replyText.length > 300) {
+                showToast('Reply is too long! Maximum 300 characters.', 'warning');
+                return;
+            }
+            
+            try {
+                const replyData = {
+                    author: currentUsername,
+                    text: replyText,
+                    timestamp: Date.now(),
+                    likes: 0,
+                    likedBy: {}
+                };
+                
+                await database.ref(`comments/${parentId}/replies`).push(replyData);
+                
+                document.getElementById(`reply-text-${parentId}`).value = '';
+                document.getElementById(`reply-form-${parentId}`).style.display = 'none';
+                loadComments();
+            } catch (error) {
+                console.warn('Error posting reply:', error);
+                showToast('Failed to post reply. Please try again.', 'error');
+            }
+        }
+        
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            const bgColor = type === 'error' ? 'var(--danger)' : 
+                           type === 'warning' ? 'var(--warning)' : 
+                           'var(--primary)';
+            
+            toast.style.cssText = `
+                position: fixed; top: 20px; right: 20px; z-index: 1000;
+                background: ${bgColor}; color: white; padding: 10px 15px;
+                border-radius: 5px; font-size: 0.8rem; max-width: 300px;
+                box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+                animation: slideIn 0.3s ease-out;
+            `;
+            toast.textContent = message;
+            
+            // Add animation keyframes if not exists
+            if (!document.getElementById('toast-styles')) {
+                const style = document.createElement('style');
+                style.id = 'toast-styles';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                if (toast && toast.parentNode) {
+                    toast.style.animation = 'slideIn 0.3s ease-out reverse';
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 300);
+                }
+            }, 3000);
+        }
+        
+        function cancelReply(commentId) {
+            document.getElementById(`reply-form-${commentId}`).style.display = 'none';
+            document.getElementById(`reply-text-${commentId}`).value = '';
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function formatTime(timestamp) {
+            const now = Date.now();
+            const diff = now - timestamp;
+            
+            const minutes = Math.floor(diff / (1000 * 60));
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            
+            if (minutes < 1) return 'just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            if (days < 7) return `${days}d ago`;
+            
+            return new Date(timestamp).toLocaleDateString();
+        }
+        
         // Initialize level buttons
         function initializeLevelButtons() {
             levelSelector.innerHTML = '';
@@ -635,20 +1404,21 @@
             leaderboardSelect.value = currentLevel;
         }
         
-        // Load user data from Firebase
-        async function loadUserData() {
+        // Load user data from Firebase - Optimized version
+        async function loadUserDataOptimized() {
             try {
                 const snapshot = await database.ref('users/' + currentUsername).once('value');
                 if (!snapshot.exists()) {
                     // Initialize new user
-                    await database.ref('users/' + currentUsername).set({
+                    const userData = {
                         scores: Array(10).fill(0),
                         playCount: Array(10).fill(0),
                         lastPlayed: new Date().toISOString(),
                         history: {},
                         maxUnlocked: 1,
                         created: new Date().toISOString()
-                    });
+                    };
+                    database.ref('users/' + currentUsername).set(userData).catch(console.error);
                     maxUnlockedLevel = 1;
                 } else {
                     const data = snapshot.val();
@@ -658,8 +1428,9 @@
                 initializeLevelButtons();
                 initializeLeaderboardSelect();
             } catch (error) {
-                console.error('Error loading user data:', error);
-                throw error;
+                console.warn('Error loading user data:', error);
+                // Continue with defaults
+                maxUnlockedLevel = 1;
             }
         }
         
@@ -839,11 +1610,17 @@
         
         async function updateHiScore() {
             try {
-                const snapshot = await database.ref('users/' + currentUsername + '/scores/' + (currentLevel - 1)).once('value');
+                // Add timeout for hi-score loading
+                const scorePromise = database.ref('users/' + currentUsername + '/scores/' + (currentLevel - 1)).once('value');
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Hi-score timeout')), 2000)
+                );
+                
+                const snapshot = await Promise.race([scorePromise, timeoutPromise]);
                 hiScore = snapshot.val() || 0;
                 document.getElementById('hi-score').textContent = hiScore;
             } catch (error) {
-                console.error('Error loading hi-score:', error);
+                console.warn('Error loading hi-score:', error);
                 hiScore = 0;
                 document.getElementById('hi-score').textContent = hiScore;
             }
@@ -1132,8 +1909,13 @@
         
         async function updateTopLeaderboard() {
             try {
-                // Get all users for current level
-                const usersSnapshot = await database.ref('users').once('value');
+                // Add timeout and fallback
+                const leaderboardPromise = database.ref('users').once('value');
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Leaderboard timeout')), 2000)
+                );
+                
+                const usersSnapshot = await Promise.race([leaderboardPromise, timeoutPromise]);
                 const allUsers = usersSnapshot.val() || {};
                 
                 const levelScores = [];
@@ -1168,7 +1950,44 @@
                     });
                 }
             } catch (error) {
-                console.error('Error loading top leaderboard:', error);
+                console.warn('Error loading top leaderboard:', error);
+                const topLeaderboard = document.getElementById('top-leaderboard');
+                topLeaderboard.innerHTML = '<div class="leaderboard-item"><span>Leaderboard loading...</span></div>';
+                
+                // Retry after delay
+                setTimeout(() => {
+                    database.ref('users').once('value').then(snapshot => {
+                        const allUsers = snapshot.val() || {};
+                        const levelScores = [];
+                        
+                        for (const username in allUsers) {
+                            const userStats = allUsers[username];
+                            if (userStats && userStats.scores && userStats.scores[currentLevel - 1]) {
+                                levelScores.push({
+                                    username: username,
+                                    score: userStats.scores[currentLevel - 1]
+                                });
+                            }
+                        }
+                        
+                        levelScores.sort((a, b) => b.score - a.score);
+                        const topScores = levelScores.slice(0, 3);
+                        
+                        if (topScores.length === 0) {
+                            topLeaderboard.innerHTML = '<div class="leaderboard-item"><span>No records yet</span></div>';
+                        } else {
+                            topLeaderboard.innerHTML = '';
+                            topScores.forEach((item, index) => {
+                                const div = document.createElement('div');
+                                div.className = `leaderboard-item ${item.username === currentUsername ? 'highlight' : ''}`;
+                                div.innerHTML = `<span>${index + 1}. ${item.username}${item.username === currentUsername ? ' (You)' : ''}</span> <span>${item.score}</span>`;
+                                topLeaderboard.appendChild(div);
+                            });
+                        }
+                    }).catch(() => {
+                        topLeaderboard.innerHTML = '<div class="leaderboard-item"><span>No records yet</span></div>';
+                    });
+                }, 3000);
             }
         }
         
